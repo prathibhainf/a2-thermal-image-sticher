@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101a20" />
+    <title>SolarScope | Drone thermography workspace</title>
+    <link rel="preconnect" href="https://unpkg.com" />
+    <link rel="preconnect" href="https://tile.openstreetmap.org" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="SolarScope home">
+          <span class="brand-mark" aria-hidden="true">S</span>
+          <span>solar<span class="brand-light">scope</span></span>
+        </a>
+        <div class="topbar-meta">
+          <span class="status-dot"></span>
+          <span>LOCAL WORKSPACE</span>
+          <span class="topbar-divider"></span>
+          <span id="project-label">New inspection</span>
+        </div>
+        <button class="button button-quiet" id="clear-button" type="button" disabled>
+          Clear project
+        </button>
+      </header>
+
+      <main>
+        <section class="intro">
+          <div>
+            <p class="eyebrow">SOLAR DRONE THERMOGRAPHY</p>
+            <h1>See the whole array.</h1>
+            <p class="intro-copy">
+              Bring RGB and thermal captures together, trace the flight, and inspect every
+              geotagged image.
+            </p>
+          </div>
+          <div class="intro-badge">
+            <span class="badge-icon" aria-hidden="true">⌖</span>
+            GPS-READY WORKSPACE
+          </div>
+        </section>
+
+        <section class="workspace" aria-label="Solar inspection workspace">
+          <aside class="side-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">INSPECTION</p>
+                <h2>Image library</h2>
+              </div>
+              <span class="count-pill" id="image-count">0</span>
+            </div>
+
+            <label class="upload-zone" id="upload-zone" for="image-input">
+              <input
+                id="image-input"
+                type="file"
+                accept="image/*,.tif,.tiff"
+                multiple
+              />
+              <span class="upload-icon" aria-hidden="true">↑</span>
+              <strong>Drop images to get started</strong>
+              <span>or <span class="upload-link">browse files</span></span>
+              <small>RGB + thermal · JPG, PNG, TIFF</small>
+            </label>
+
+            <div class="library-toolbar">
+              <span>CAPTURES</span>
+              <button class="text-button" id="sort-button" type="button" disabled>
+                Sort: flight order
+              </button>
+            </div>
+            <div class="capture-list" id="capture-list">
+              <div class="empty-list">
+                <span aria-hidden="true">◈</span>
+                <p>Your uploaded captures will appear here.</p>
+              </div>
+            </div>
+            <div class="side-footer">
+              <span class="privacy-icon" aria-hidden="true">▣</span>
+              Images stay in this browser session. Nothing is uploaded to a server.
+            </div>
+          </aside>
+
+          <section class="main-panel">
+            <div class="workspace-tabs">
+              <button class="tab active" data-view="map-view" type="button">
+                <span aria-hidden="true">⌖</span> Flight map
+              </button>
+              <button class="tab" data-view="mosaic-view" type="button">
+                <span aria-hidden="true">▦</span> Array preview
+              </button>
+              <div class="tab-spacer"></div>
+              <span class="map-source">OPENSTREETMAP</span>
+            </div>
+
+            <div class="view-container" id="map-view">
+              <div id="map" role="application" aria-label="Map showing geotagged drone captures"></div>
+              <div class="map-empty" id="map-empty">
+                <div class="empty-crosshair" aria-hidden="true">⌖</div>
+                <strong>Your flight path starts here</strong>
+                <span>Upload geotagged images to see capture locations on the map.</span>
+              </div>
+              <div class="map-legend">
+                <span><i class="legend-dot rgb-dot"></i> RGB</span>
+                <span><i class="legend-dot thermal-dot"></i> Thermal</span>
+                <span><i class="legend-line"></i> Flight path</span>
+              </div>
+              <div class="map-attribution-note">Map © OpenStreetMap contributors</div>
+            </div>
+
+            <div class="view-container mosaic-container hidden" id="mosaic-view">
+              <div class="mosaic-toolbar">
+                <div>
+                  <p class="eyebrow">GPS-PLACED CAPTURES</p>
+                  <h3 id="mosaic-title">Thermal array preview</h3>
+                </div>
+                <div class="mode-switch" role="group" aria-label="Preview image type">
+                  <button class="mode-button active" data-mode="thermal" type="button">Thermal</button>
+                  <button class="mode-button" data-mode="rgb" type="button">RGB</button>
+                </div>
+              </div>
+              <div class="mosaic-canvas-wrap">
+                <canvas id="mosaic-canvas" aria-label="Approximate image layout based on GPS coordinates"></canvas>
+                <div class="mosaic-empty" id="mosaic-empty">
+                  <span aria-hidden="true">▦</span>
+                  <strong>Array preview will appear here</strong>
+                  <span>Add captures with GPS coordinates to build a location-based preview.</span>
+                </div>
+              </div>
+              <p class="mosaic-disclaimer">
+                Preview only: GPS positions do not include camera pose, altitude, or lens
+                calibration. This is not a geometrically corrected orthomosaic.
+              </p>
+            </div>
+
+            <footer class="workspace-footer">
+              <div class="metric">
+                <span class="metric-icon" aria-hidden="true">⌖</span>
+                <span><strong id="gps-count">0</strong><small>GPS LOCATIONS</small></span>
+              </div>
+              <span class="footer-divider"></span>
+              <div class="metric">
+                <span class="metric-icon thermal-icon" aria-hidden="true">◉</span>
+                <span><strong id="thermal-count">0</strong><small>THERMAL IMAGES</small></span>
+              </div>
+              <span class="footer-divider"></span>
+              <div class="metric">
+                <span class="metric-icon rgb-icon" aria-hidden="true">◉</span>
+                <span><strong id="rgb-count">0</strong><small>RGB IMAGES</small></span>
+              </div>
+              <div class="footer-spacer"></div>
+              <span class="coordinates-note" id="coordinate-note">Waiting for captures</span>
+            </footer>
+          </section>
+        </section>
+      </main>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </div>
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
